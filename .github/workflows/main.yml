@@ -1,0 +1,36 @@
+name: Pipeline de Dados ANS
+
+on:
+  workflow_dispatch: # Permite rodar o script manualmente clicando em um botão no GitHub
+  schedule:
+    - cron: '0 8 1 * *' # Executa todo dia 1º do mês às 08:00 UTC
+
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip' # Acelera a execução cacheando as dependências
+
+      - name: Instalar Dependências
+        run: |
+          python -m pip install --upgrade pip
+          # openpyxl é obrigatório para exportar o DataFrame para Excel
+          pip install pandas requests openpyxl
+
+      - name: Executar Script de Processamento
+        run: python nome_do_seu_script.py # Substitua pelo nome do seu arquivo Python
+
+      - name: Upload do Arquivo Excel (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Base_Cenario_Saude_Excel
+          path: arquivo_base_cenario_saude_*.xlsx
+          retention-days: 7 # O arquivo ficará disponível para download no GitHub por 7 dias
